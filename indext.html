@@ -1,47 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scientific Calculator</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <title>Tic Tac Toe</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 5px;
+      justify-content: center;
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      font-size: 2em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f0f0f0;
+      cursor: pointer;
+    }
+    .cell:hover {
+      background-color: #ddd;
+    }
+    #status {
+      margin-top: 20px;
+      font-size: 1.2em;
+    }
+    #reset {
+      margin-top: 10px;
+      padding: 8px 16px;
+      font-size: 1em;
+    }
+  </style>
 </head>
 <body>
-    <div class="calculator">
-        <input type="text" id="display" class="display" disabled />
-        <div class="buttons">
-            <button class="button" onclick="appendToDisplay('7')">7</button>
-            <button class="button" onclick="appendToDisplay('8')">8</button>
-            <button class="button" onclick="appendToDisplay('9')">9</button>
-            <button class="button" onclick="appendToDisplay('/')">/</button>
+  <h1>Tic Tac Toe</h1>
+  <div id="board"></div>
+  <div id="status">Player X's turn</div>
+  <button id="reset">Reset Game</button>
 
-            <button class="button" onclick="appendToDisplay('4')">4</button>
-            <button class="button" onclick="appendToDisplay('5')">5</button>
-            <button class="button" onclick="appendToDisplay('6')">6</button>
-            <button class="button" onclick="appendToDisplay('*')">*</button>
+  <script>
+    const board = document.getElementById('board');
+    const status = document.getElementById('status');
+    const resetButton = document.getElementById('reset');
 
-            <button class="button" onclick="appendToDisplay('1')">1</button>
-            <button class="button" onclick="appendToDisplay('2')">2</button>
-            <button class="button" onclick="appendToDisplay('3')">3</button>
-            <button class="button" onclick="appendToDisplay('-')">-</button>
+    let currentPlayer = 'X';
+    let gameActive = true;
+    let gameState = Array(9).fill('');
 
-            <button class="button" onclick="appendToDisplay('0')">0</button>
-            <button class="button" onclick="appendToDisplay('.')">.</button>
-            <button class="button" onclick="calculateResult()">=</button>
-            <button class="button" onclick="appendToDisplay('+')">+</button>
+    const winningCombinations = [
+      [0,1,2], [3,4,5], [6,7,8], // rows
+      [0,3,6], [1,4,7], [2,5,8], // columns
+      [0,4,8], [2,4,6]           // diagonals
+    ];
 
-            <button class="button" onclick="appendToDisplay('Math.sqrt(')">√</button>
-            <button class="button" onclick="appendToDisplay('Math.sin(')">sin</button>
-            <button class="button" onclick="appendToDisplay('Math.cos(')">cos</button>
-            <button class="button" onclick="appendToDisplay('Math.tan(')">tan</button>
+    function handleClick(index) {
+      if (gameState[index] || !gameActive) return;
 
-            <button class="button" onclick="appendToDisplay('Math.log(')">log</button>
-            <button class="button" onclick="appendToDisplay('Math.PI')">π</button>
-            <button class="button" onclick="appendToDisplay('Math.E')">e</button>
-            <button class="button" onclick="clearDisplay()">C</button>
-        </div>
-    </div>
+      gameState[index] = currentPlayer;
+      document.getElementById(`cell-${index}`).textContent = currentPlayer;
 
-    <script src="script.js"></script>
+      if (checkWinner()) {
+        status.textContent = `Player ${currentPlayer} wins!`;
+        gameActive = false;
+        return;
+      }
+
+      if (!gameState.includes('')) {
+        status.textContent = "It's a draw!";
+        gameActive = false;
+        return;
+      }
+
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+      status.textContent = `Player ${currentPlayer}'s turn`;
+    }
+
+    function checkWinner() {
+      return winningCombinations.some(combo => {
+        return combo.every(index => gameState[index] === currentPlayer);
+      });
+    }
+
+    function createBoard() {
+      board.innerHTML = '';
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.id = `cell-${i}`;
+        cell.addEventListener('click', () => handleClick(i));
+        board.appendChild(cell);
+      }
+    }
+
+    function resetGame() {
+      gameState.fill('');
+      currentPlayer = 'X';
+      gameActive = true;
+      status.textContent = `Player ${currentPlayer}'s turn`;
+      createBoard();
+    }
+
+    resetButton.addEventListener('click', resetGame);
+
+    createBoard(); // initialize on load
+  </script>
 </body>
 </html>
